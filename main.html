@@ -2,35 +2,71 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Video Speed Scrubber</title>
+  <title>Custom Video Player</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
-  <div class="wrapper">
-    <video class="flex" width="765" height="430" src="https://www.w3schools.com/html/mov_bbb.mp4" controls></video>
-    <div class="speed">
-      <div class="speed-bar">1×</div>
+  <div class="player">
+    <video class="player__video" width="750" height="430" src="https://www.w3schools.com/html/mov_bbb.mp4"></video>
+    <div class="player__controls">
+      <button class="player__button toggle">►</button>
+      <input type="range" name="volume" class="player__slider" min="0" max="1" step="0.05" value="1">
+      <input type="range" name="playbackSpeed" class="player__slider" min="0.5" max="2" step="0.1" value="1">
+      <button class="rewind" data-skip="-10">« 10s</button>
+      <button class="forward" data-skip="25">25s »</button>
+      <div class="progress">
+        <div class="progress__filled"></div>
+      </div>
     </div>
   </div>
 
-<script  src="./script.js">
-  //Your code goes here
-	const speed = document.querySelector('.speed');
-  const speedBar = document.querySelector('.speed-bar');
-  const video = document.querySelector('video');
+<script>
+  const video = document.querySelector('.player__video');
+  const toggle = document.querySelector('.toggle');
+  const volume = document.querySelector('input[name="volume"]');
+  const playbackSpeed = document.querySelector('input[name="playbackSpeed"]');
+  const rewind = document.querySelector('.rewind');
+  const forward = document.querySelector('.forward');
+  const progress = document.querySelector('.progress');
+  const progressFilled = document.querySelector('.progress__filled');
 
-  speed.addEventListener('mousemove', function (e) {
-      const y = e.pageY - this.offsetTop;
-      const percent = y / this.offsetHeight;
-      const min = 0.5;
-      const max = 2;
-      const playbackRate = percent * (max - min) + min;
-      
-      speedBar.style.height = `${percent * 100}%`;
-      speedBar.textContent = `${playbackRate.toFixed(2)}×`;
-      video.playbackRate = playbackRate;
-  });
+  function togglePlay() {
+      if (video.paused) {
+          video.play();
+          toggle.textContent = '❚ ❚';
+      } else {
+          video.pause();
+          toggle.textContent = '►';
+      }
+  }
+
+  function updateProgress() {
+      const percent = (video.currentTime / video.duration) * 100;
+      progressFilled.style.width = `${percent}%`;
+  }
+
+  function handleRangeUpdate() {
+      video[this.name] = this.value;
+  }
+
+  function skip() {
+      video.currentTime += parseFloat(this.dataset.skip);
+  }
+
+  function scrub(e) {
+      const scrubTime = (e.offsetX / progress.offsetWidth) * video.duration;
+      video.currentTime = scrubTime;
+  }
+
+  video.addEventListener('click', togglePlay);
+  toggle.addEventListener('click', togglePlay);
+  video.addEventListener('timeupdate', updateProgress);
+  volume.addEventListener('input', handleRangeUpdate);
+  playbackSpeed.addEventListener('input', handleRangeUpdate);
+  rewind.addEventListener('click', skip);
+  forward.addEventListener('click', skip);
+  progress.addEventListener('click', scrub);
 </script>
 </body>
 </html>
